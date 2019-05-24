@@ -1,5 +1,5 @@
 <template>
-  <div class="hello"> 
+ <div class="hello">
     <h1>{{ msg }}</h1>
     <h2>TOKPEDIA TEST</h2>
 	 <form method="POST" action="" @submit.prevent="submitData()">
@@ -24,8 +24,7 @@ export default {
 	  datainput: '',
 	  errors:[],
     }
-  },
-   
+  }, 
   methods: {  
 		  submitData() {
                     this.showTime('error',this.datainput) 
@@ -38,12 +37,9 @@ export default {
                   duration: 5000
               })
           },
-		}, 
-	
-	mounted() {  
-		 
-	}
-		
+		},  
+	mounted() {   
+	} 
 }
 </script>
 
