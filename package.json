@@ -13,6 +13,7 @@
   "dependencies": {
     "es6-promise": "^4.2.6",
     "vue": "^2.5.2",
+    "vue-numeric": "^2.3.0",
     "vue-router": "^3.0.1",
     "vue-toasted": "^1.1.27"
   },
