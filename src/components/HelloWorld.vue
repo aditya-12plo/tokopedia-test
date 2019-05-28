@@ -4,15 +4,17 @@
     <h2>TOKPEDIA TEST</h2>
 	 <form method="POST" action="" @submit.prevent="submitData()">
     <ul>
-      <li>
-	  <vue-numeric currency="Rp" separator="." v-model="dataInput" class="form-text"></vue-numeric> 
+      <li> 
 	<input type="text" v-model="dataInput2" class="form-text">
       </li> 
       <li>
 	<button type="submit" class="btn btn-success">Submit</button>
       </li> 
     </ul>
-	</form> 
+	</form>
+
+	{{dataOutput}}
+	
   </div>
 </template>
 
@@ -28,12 +30,13 @@ export default {
         },   
   data () {
     return {
-      msg			: 'Front End Use Vue.js App',
-	  dataInput		: '',
+      msg			: 'Front End Use Vue.js App', 
+	  dataOutput	: '',
 	  dataInput2	: '',
+	  numberInput 	: [],
 	  afterComma	: '',
 	  errors		: [],
-	  dataFix		: [100000, 50000, 20000, 10000, 5000, 1000, 500, 100, 50],
+	  dataFix		: [{length:6,value:100000},{length:5,value:50000},{length:5,value:20000},{length:5,value:10000},{length:4,value:5000},{length:4,value:1000},{length:3,value:500},{length:3,value:100},{length:2,value:50}],
     }
   }, 
   methods: {  
@@ -43,46 +46,181 @@ export default {
 		  var totalString = this.dataInput2.length;
                  
 				 var checkRp = this.invalidSeparatorCharacter(data,totalString); 
-				 this.showTime('success',checkRp); 
+				 this.dataOutput =  checkRp; 
 		  },
 		  
 		  invalidSeparatorCharacter(data,total)
 		  {
 			var Character = data;
-			var Character2 = data.substring(0,2);
-			var Character3 = data.substring(0,3);
+			var Character2 = data.substring(0,2); 
 			
 			if(Character2 == 'Rp' )
 			{
 				var checkCharacter = data.substring(3,2);
 				
 				if(isNaN(checkCharacter)){
-					this.showTime('warning','invalid separator');
+					this.checkMissingValue(data,total);
 				}else{
 					if(checkCharacter == ' '){
 					var checkCharacter2 = data.substring(4,2);
-						if(isNaN(checkCharacter)){
-							this.showTime('warning','invalid separator');
-						}else{
-							return checkCharacter2; 
+					if (this.isNumeric(checkCharacter2)) {
+							var dataCheck = data.substring(3,total); 
+								var checkstringData = this.checkString(dataCheck); 
+								if(checkstringData){
+									var checkSeparatorComma = this.invalidSeparatorComma(dataCheck); 
+										if(checkSeparatorComma){
+											var invalidSeparatorDot = this.invalidSeparatorDot(checkSeparatorComma); 
+											if(invalidSeparatorDot){
+											return invalidSeparatorDot;   
+											}else{
+											this.checkMissingValue(data,total);
+											}
+										}else{
+											this.checkMissingValue(data,total);
+										}
+								}else{ 
+									this.checkMissingValue(data,total);
+								}
+							
+						}else{ 
+									this.checkMissingValue(data,total);
 						}
 					}else{
-						return 'no';  
+							var dataCheck = data.substring(2,total); 
+							var checkSeparatorComma = this.invalidSeparatorComma(dataCheck); 
+										if(checkSeparatorComma){
+											var invalidSeparatorDot = this.invalidSeparatorDot(checkSeparatorComma); 
+											if(invalidSeparatorDot){
+											return invalidSeparatorDot;   
+											}else{
+											this.checkMissingValue(data,total);
+											}
+										}else{
+											this.checkMissingValue(data,total);
+										} 
 						
 					}
 					  
 				} 
 				 
 			} 
-			else{ 
+			else{  
+					var checkstringData = this.checkString(data);
+							if(checkstringData){
+								var checkSeparatorComma = this.invalidSeparatorComma(data); 
+										if(checkSeparatorComma){
+											var invalidSeparatorDot = this.invalidSeparatorDot(checkSeparatorComma); 
+											if(invalidSeparatorDot){
+											return this.calculateFraction(invalidSeparatorDot);   
+											}else{
+											this.checkMissingValue(data,total);
+											}
+										}else{
+											this.checkMissingValue(data,total);
+										} 
+							}else{ 
+								this.checkMissingValue(data,total);
+							}
+			}
+		  },
+		  
+		  calculateFraction(data){
+			// 12511
+			var dataLength = data.toString().length;
+			var dataLastDigit = data.toString().split('').pop();
+			var x = dataLength-1;
+			var total = 0; 
+			var result = [];
+			 
+			for(var i=0; i < dataLength; i++){
+				var digit 			= data.toString()[i];
+				var tens 			= Number(digit)*Math.pow(10,x); 
+				var tensLength 		= Number(tens.toString().length);  
+				var checkFraction	= this.checkLengthDataFix(tensLength);
+					if(checkFraction.length > 0){
+					var calculateFractionWithNumber = this.calculateFractionWithNumber(checkFraction,tens);
+					result[i] = calculateFractionWithNumber;
+					}
+					 
+				x--;		
+			}
+			 
+			result.push({
+							value: 0,
+							lembar: 0,
+							out:Number(dataLastDigit)
+						  });
+						  
+						  
+			return result;
+			 
+		  },
+		  
+		  calculateFractionWithNumber(fraction, number) {
+			  var found = [];
+			  var out = number;
+			  fraction.forEach(function(element) { 
+				if (out >= element) {
+				  var lembar = parseInt(out/element);
+				  found.push({
+					value: element,
+					lembar: lembar,
+					out:out
+				  });
+				  out = out - (lembar*element);
+				  
+					  if(out < element && out > 0){
+							found.push({
+							value: 0,
+							lembar: 0,
+							out:out
+						  });
+					  }
+				} 
+				
+			  });
+
+			  return found;
+			},
+		  
+		  checkLengthDataFix(data){
+		  var found = [];
+		  var i = 0;
+		  this.dataFix.forEach(function(element) {
+				  if(element.length == data)
+				  {
+					 found.push(element.value);        
+				  }
+			 i++;
+			});
+
+				return found; 
+		  },
+		  		 
+		  
+		  checkString(data)
+		  { 
 				var isValid = /^[0-9,.]*$/.test(data); 
 				if(isValid){
-					var checkSeparatorComma = this.invalidSeparatorComma(data); 
-					return checkSeparatorComma;  
+					return true;  
 				}else{
-					this.showTime('warning','invalid separator');
+					return false;  
 				} 
-			}
+		  },
+		  
+		  checkMissingValue(data,total){
+				var Character2 = data.substring(0,2); 
+				var Character3 = data.substring(total,total-2); 
+					 if(Character2 == 'Rp' && total == 2)
+					{
+						this.showTime('warning','missing value');
+					} 
+					else if(Character3 == 'Rp'){
+						this.showTime('warning','valid character in wrong position');
+					}
+					else{
+						this.showTime('warning','invalid separator');
+					}
 		  },
 		   
 		  invalidSeparatorComma(data)
@@ -92,25 +230,58 @@ export default {
 					var splitString = data.split(","); 
 					if(splitString.length > 2)
 					{
-						this.showTime('warning','invalid separator');
+						return false;
 					}
 					else
 					{ 
 						if(splitString[1].length > 2){
-							this.showTime('warning','invalid separator');
+							return false;
 						}else{
 							this.afterComma = splitString[1];
-							return true; 						
+							return  splitString[0];			
 						}
 					}
 			  }
 			  else
 			  {
-						return data;
+						return data;			
+			  } 		  
+		  },
+		   
+		  invalidSeparatorDot(data)
+		  {
+		  var indexOf = data.indexOf('.');
+			  if (indexOf > -1) { 
+					var splitString = data.split("."); 
+					
+					var errorNya = [];
+					 for(var i =0; i < splitString.length; i++){
+							if(splitString[i].length > 3){
+							 errorNya[i] = 'error';
+						}
+					  }
+					  
+					  if(errorNya.length > 0){
+						return false;
+					  }else{ 
+					  var replaceNumber = data.replace(".", "");
+					  var countNumber 	= Math.floor(replaceNumber);
+					  
+					  return countNumber;
+					  } 
+			  }
+			  else
+			  {
+					  var replaceNumber = data.replace(".", "");
+					  var countNumber 	= Math.floor(replaceNumber);
+					  
+					  return countNumber;
 			  } 		  
 		  },
 		  
-		  
+		isNumeric(n) {
+			return !isNaN(parseFloat(n)) && isFinite(n);
+		  },
 		  
           showTime(type,pesan) {
               this.$toasted.show(pesan, { 
@@ -121,7 +292,10 @@ export default {
               })
           },
 		},  
+		 
+	
 	mounted() {   
+			//this.calculateFraction(15068);   
 	} 
 }
 </script>
