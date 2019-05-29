@@ -85,7 +85,7 @@ export default {
 										if(checkSeparatorComma){
 											var invalidSeparatorDot = this.invalidSeparatorDot(checkSeparatorComma); 
 											if(invalidSeparatorDot){
-											return invalidSeparatorDot;   
+											return this.calculateFraction(invalidSeparatorDot);   
 											}else{
 											this.checkMissingValue(data,total);
 											}
@@ -155,75 +155,20 @@ export default {
 				}  
 			 
 			  });
+			  
+			  if(out > 0){
 						found.push({
 							value: 0,
 							lembar: 0,
 							out:out 
 						  });
-			  return found;
-			
-			
-			
-			/*
-			var dataLength = data.toString().length;
-			var dataLastDigit = data.toString().split('').pop();
-			var x = dataLength-1;
-			var total = 0; 
-			var result = [];
-			 
-			for(var i=0; i < dataLength; i++){
-				var digit 			= data.toString()[i];
-				var tens 			= Number(digit)*Math.pow(10,x); 
-				var tensLength 		= Number(tens.toString().length);  
-				var checkFraction	= this.checkLengthDataFix(tensLength);
-					if(checkFraction.length > 0){
-					var calculateFractionWithNumber = this.calculateFractionWithNumber(checkFraction,tens);
-					result[i] = calculateFractionWithNumber;
-					}
-					 
-				x--;		
-			}
-			 
-			result.push({
-							value: 0,
-							lembar: 0,
-							out:Number(dataLastDigit)
-						  });
+			  
+			  }
 						  
 						  
-			return result;
-			
-			*/
+			  return found; 
 			 
-		  },
-		  
-		  calculateFractionWithNumber(fraction, number) {
-			  var found = [];
-			  var out = number;
-		 
-			  fraction.forEach(function(element, index) { 
-				if (out >= element) {
-				  var lembar = parseInt(out/element);
-				  found.push({
-					value: element,
-					lembar: lembar,
-					out:out
-				  });
-				  out = out - (lembar*element);
-				 
-					  if(out < fraction[index+1] && out > 0){
-							found.push({
-							value: 0,
-							lembar: 0,
-							out:out 
-						  });
-					  }
-				}  
-			 
-			  });
-
-			  return found;
-			},
+		  }, 
 		  
 		  checkLengthDataFix(data){
 		  var found = [];
@@ -337,7 +282,7 @@ export default {
 		 
 	
 	mounted() {   
-		//	console.log(this.calculateFractionWithNumber(this.dataFix2,90011));   
+	
 	} 
 }
 </script>
