@@ -1,4 +1,5 @@
 <template>
+<div>
  <div class="hello">
     <h1>{{ msg }}</h1>
     <h2>TOKPEDIA TEST</h2>
@@ -12,9 +13,21 @@
       </li> 
     </ul>
 	</form>
-
-	{{dataOutput}}
 	
+<div v-for="item in this.dataOutput">	
+<p v-if="item.value > 0 && item.out > 0">
+ 
+{{item.lembar}}xRp{{item.value}}
+ 
+</p>
+<p v-else>
+
+left Rp{{item.out}} (no available fraction)
+</p>
+ 
+ </div>
+	
+  </div>
   </div>
 </template>
 
@@ -37,6 +50,7 @@ export default {
 	  afterComma	: '',
 	  errors		: [],
 	  dataFix		: [{length:6,value:100000},{length:5,value:50000},{length:5,value:20000},{length:5,value:10000},{length:4,value:5000},{length:4,value:1000},{length:3,value:500},{length:3,value:100},{length:2,value:50}],
+	  dataFix2		: [100000,50000,20000,10000,5000,1000,500,100,50],
     }
   }, 
   methods: {  
@@ -91,7 +105,7 @@ export default {
 										if(checkSeparatorComma){
 											var invalidSeparatorDot = this.invalidSeparatorDot(checkSeparatorComma); 
 											if(invalidSeparatorDot){
-											return invalidSeparatorDot;   
+											return this.calculateFraction(invalidSeparatorDot);   
 											}else{
 											this.checkMissingValue(data,total);
 											}
@@ -124,8 +138,33 @@ export default {
 			}
 		  },
 		  
-		  calculateFraction(data){
-			// 12511
+		  calculateFraction(number) {
+			  var found = [];
+			  var out = Number(number);
+				var fraction = this.dataFix2;
+			  fraction.forEach(function(element, index) { 
+				if (out >= element) {
+				  var lembar = parseInt(out/element);
+				  found.push({
+					value: element,
+					lembar: lembar,
+					out:out
+				  });
+				  out = out - (lembar*element);
+				   
+				}  
+			 
+			  });
+						found.push({
+							value: 0,
+							lembar: 0,
+							out:out 
+						  });
+			  return found;
+			
+			
+			
+			/*
 			var dataLength = data.toString().length;
 			var dataLastDigit = data.toString().split('').pop();
 			var x = dataLength-1;
@@ -153,13 +192,16 @@ export default {
 						  
 						  
 			return result;
+			
+			*/
 			 
 		  },
 		  
 		  calculateFractionWithNumber(fraction, number) {
 			  var found = [];
 			  var out = number;
-			  fraction.forEach(function(element) { 
+		 
+			  fraction.forEach(function(element, index) { 
 				if (out >= element) {
 				  var lembar = parseInt(out/element);
 				  found.push({
@@ -168,16 +210,16 @@ export default {
 					out:out
 				  });
 				  out = out - (lembar*element);
-				  
-					  if(out < element && out > 0){
+				 
+					  if(out < fraction[index+1] && out > 0){
 							found.push({
 							value: 0,
 							lembar: 0,
-							out:out
+							out:out 
 						  });
 					  }
-				} 
-				
+				}  
+			 
 			  });
 
 			  return found;
@@ -295,7 +337,7 @@ export default {
 		 
 	
 	mounted() {   
-			//this.calculateFraction(15068);   
+		//	console.log(this.calculateFractionWithNumber(this.dataFix2,90011));   
 	} 
 }
 </script>
